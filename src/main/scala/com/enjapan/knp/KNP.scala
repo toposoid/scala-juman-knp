@@ -7,18 +7,19 @@ import sys.process._
 /**
   * Created by Ugo Bataillard on 2/2/16.
   */
-object KNP extends App {
+object KNP {
 
   val KNP_PATH = sys.env.getOrElse("KNP_PATH", "knp")
   val JUMAN_PATH = sys.env.getOrElse("JUMAN_PATH", "juman")
 
-  val knp = new KNP
-  val bList = knp(args.head)
+  def main(args:Seq[String]):Unit = {
+    val knp = new KNP
+    val bList = knp(args.head)
 
-  bList.roots.foreach { r =>
-    r.traverse(println)
+    bList.roots.foreach { r =>
+      r.traverse(println)
+    }
   }
-
 }
 
 class KNP {
@@ -27,7 +28,7 @@ class KNP {
 
   def apply(text: String): BList = {
     val lines = Seq("echo", text) #| JUMAN_PATH #| Seq(KNP_PATH, "-tab") lineStream
-    
+
     parser.parse(lines)
   }
 }
