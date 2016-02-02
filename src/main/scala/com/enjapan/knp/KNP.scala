@@ -1,5 +1,6 @@
 package com.enjapan.knp
 
+import cats.data.Xor
 import com.enjapan.knp.models.BList
 
 import sys.process._
@@ -14,10 +15,13 @@ object KNP {
 
   def main(args:Seq[String]):Unit = {
     val knp = new KNP
-    val bList = knp(args.head)
-
-    bList.roots.foreach { r =>
-      r.traverse(println)
+    knp(args.head) match {
+      case Xor.Left(e) => throw e
+      case Xor.Right(bList) =>
+        bList.roots.foreach {
+          r =>
+            r.traverse (println)
+        }
     }
   }
 }
@@ -26,7 +30,7 @@ class KNP {
   import KNP._
   val parser = new KNPParser()
 
-  def apply(text: String): BList = {
+  def apply(text: String): Xor[ParseException, BList] = {
     val lines = Seq("echo", text) #| JUMAN_PATH #| Seq(KNP_PATH, "-tab") lineStream
 
     parser.parse(lines)

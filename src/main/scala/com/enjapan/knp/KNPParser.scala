@@ -3,6 +3,10 @@ package com.enjapan.knp
 /**
   * Created by Ugo Bataillard on 2/2/16.
   */
+
+import cats.data.Xor
+import cats.std.list._
+import cats.syntax.traverse._
 import com.enjapan.juman.JumanParser
 import com.enjapan.knp.models._
 
@@ -24,62 +28,69 @@ object KNPParser {
   val WRITER_READER_CONV_LIST = Map("一人称" -> "著者", "二人称" -> "読者")
 }
 
+case class ParseException(msg: String) extends Exception(msg)
+
 class KNPParser(val breakingPattern: Regex = "^EOS$".r ) {
 
-  def parse(lines: Iterable[String]): BList = {
+  def parse(lines: Iterable[String]): Xor[ParseException, BList] = {
 
     val relevantLines = lines.map(_.trim)
       .filter(_.nonEmpty)
       .takeWhile(!breakingPattern.pattern.matcher(_).find)
       .filterNot(_.startsWith("EOS"))
 
-    relevantLines.find(_.startsWith(";;")) foreach { errorLine =>
-      throw new RuntimeException(s"Error found line starting with ';;: $errorLine")
-    }
+    for {
+      _ <- relevantLines.find(_.startsWith(";;")).fold(Xor.right[ParseException, Null](null)) { errorLine =>
+        Xor.left(ParseException(s"Error found line starting with ';;: $errorLine"))
+      }
 
-    // Check if there can be only one comment
-    val (comment, sid) = relevantLines.find(_.startsWith("#")).map { line =>
-      val KNPParser.SID_REGEX(sid) = line
-      (line, sid)
-    }.getOrElse(("",""))
+      // Check if there can be only one comment
+      (comment, sid) = relevantLines.find(_.startsWith("#")).map { line =>
+        val KNPParser.SID_REGEX(sid) = line
+        (line, sid)
+      }.getOrElse(("",""))
 
-    val bunsetsus = parseKNPNodeLines[Bunsetsu]("*", relevantLines.drop(1), parseBunsetsu)
+      bunsetsus <- parseKNPNodeLines[Bunsetsu]("*", relevantLines.drop(1), parseBunsetsu)
 
-    BList(breakingPattern.toString, comment, sid, bunsetsus)
+    } yield BList(breakingPattern.toString, comment, sid, bunsetsus.toIndexedSeq)
   }
 
-  def parseBunsetsu(lines: Iterable[String]): Bunsetsu = {
-    val tags = parseKNPNodeLines[Tag]("+", lines.drop(1), parseTag)
-    parseLine(lines.head, KNPParser.BUNSETSU_REGEX).map { case (parentId, dpndtype, fstring) =>
-      val repName = KNPParser.BUNSETSU_REP_NAME_REGEX.findFirstMatchIn(fstring) map (_.group(1))
-      Bunsetsu(parentId, dpndtype, fstring, repName, tags)
-    }.getOrElse{
-      throw new RuntimeException(s"Illegal bunsetsu spec: $lines")
-    }
+  def parseBunsetsu(lines: Iterable[String]): ParseException Xor Bunsetsu = {
+    for {
+      tags <- parseKNPNodeLines[Tag]("+", lines.drop(1), parseTag)
+      obun = parseLine(lines.head, KNPParser.BUNSETSU_REGEX).map { case (parentId, dpndtype, fstring) =>
+        val repName = KNPParser.BUNSETSU_REP_NAME_REGEX.findFirstMatchIn(fstring) map (_.group(1))
+        Bunsetsu(parentId, dpndtype, fstring, repName, tags)
+      }
+      res <- Xor.fromOption(obun, ParseException(s"Illegal bunsetsu spec: $lines"))
+    } yield res
   }
 
-  def parseTag(lines: Iterable[String]): Tag = {
-    val morphemes = lines.drop(1) map JumanParser.parseMorpheme
-    parseLine(lines.head, KNPParser.TAG_REGEX).map { case (parentId, dpndtype, fstring) =>
-      val (features, rels, pas) = parseFeatures(fstring, ignoreFirstCharacter = false)
-      Tag(parentId, dpndtype, fstring, morphemes.toList, features, rels, pas)
-    }.getOrElse {
-      throw new RuntimeException(s"Illegal tag spec: $lines")
-    }
+  def parseTag(lines: Iterable[String]): Xor[ParseException, Tag] = {
+    for {
+      morphemes <- (lines.drop(1) map JumanParser.parseMorpheme).toList.sequenceU
+      otag = parseLine(lines.head, KNPParser.TAG_REGEX).map { case (parentId, dpndtype, fstring) =>
+        val (features, rels, pas) = parseFeatures(fstring, ignoreFirstCharacter = false)
+        Tag(parentId, dpndtype, fstring, morphemes, features, rels, pas)
+      }
+      res <- Xor.fromOption(otag, ParseException(s"Illegal tag spec: $lines"))
+    } yield res
   }
 
   def parseKNPNodeLines[T](
     prefix:String,
-    lines:Iterable[String], parseNode: Iterable[String] => T): IndexedSeq[T] = {
+    lines:Iterable[String], parseNode: Iterable[String] => Xor[ParseException, T]): Xor[ParseException, List[T]] = {
     @tailrec
-    def recParse(lines: Iterable[String], result: List[T]): List[T] = lines match {
-      case ls if ls.isEmpty => result
-      case ls if ls.head.startsWith(prefix) =>
+    def recParse(lines: Iterable[String], result: Xor[ParseException, List[T]]): Xor[ParseException, List[T]] = (lines, result) match {
+      case (_, r: Xor.Left[ParseException]) => r
+      case (ls,r) if ls.isEmpty => r
+      case (ls, Xor.Right(r)) if ls.head.startsWith(prefix) =>
         val (nodeLines, remainingLines) = lines.tail.span(!_.startsWith(prefix))
         val node = parseNode(Iterable(ls.head) ++ nodeLines)
-        recParse(remainingLines, node :: result)
+        recParse(remainingLines, node.map(_::r))
+      case (ls,_) => Xor.Left(ParseException(s"Invalid line while parsing KNP node: $ls"))
     }
-    recParse(lines, List.empty).reverse.toIndexedSeq
+    recParse(lines, Xor.right(List.empty)).map(_.reverse)
   }
 
   def parseFeatures(fstring: String, ignoreFirstCharacter: Boolean): (Map[String,String], List[Rel], Option[Pas]) = {
@@ -108,13 +119,13 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r ) {
       val arguments = mutable.Map[String, Argument]()
       for {
         k <- cs.drop(2).mkString("").split(";")
-        items = k.split("/") if !(items(1) == "U") && !(items(1) == "-")
+        items = k.split("/") if !(items(1) == "U") && !(items(1) == "-") && items.size > 5
       } { arguments.put(items(0), Argument(items(0), items(1), items(2), items(3).toInt, items(5))) }
       Some(Pas(cfid, arguments.toMap))
     }
   }
 
-  def parseRel(fstring:String , consider_writer_reader:Boolean = false): Option[Rel] = {
+  def parseRel(fstring:String , considerWriterReader:Boolean = false): Option[Rel] = {
 
     KNPParser.REL_REGEX
       .findAllMatchIn(fstring)
@@ -124,9 +135,9 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r ) {
             Rel(atype, target, sid, mode, rest.headOption.map(_.toInt))
         }
 
-        case m if consider_writer_reader && m.subgroups.size >= 3 &&
+        case m if considerWriterReader && m.subgroups.size >= 3 &&
           m.subgroups(1) != "？" &&
-          (consider_writer_reader && {
+          (considerWriterReader && {
             val target = m.subgroups(2)
             target != "なし" && KNPParser.WRITER_READER_LIST.contains(target) || KNPParser.WRITER_READER_CONV_LIST.contains(target)
           }) => m.subgroups match {

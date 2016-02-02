@@ -16,7 +16,8 @@ class KNPParserTest extends FunSuite with Matchers {
 
     val bList = parser.parse(lines)
 
-    bList.bunsetsuList.size should be (7)
+    bList.isRight shouldBe true
+    bList.foreach(_.bunsetsuList.size should be (7))
 
   }
 
