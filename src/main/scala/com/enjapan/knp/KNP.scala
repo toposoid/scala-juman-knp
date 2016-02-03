@@ -2,6 +2,7 @@ package com.enjapan.knp
 
 import cats.data.Xor
 import com.enjapan.knp.models.BList
+import scala.language.postfixOps
 
 import sys.process._
 

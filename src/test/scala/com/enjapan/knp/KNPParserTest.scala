@@ -68,7 +68,7 @@ class KNPParserTest extends FunSuite with Matchers {
 
     val res = parser.parseBunsetsu(bunsetsuString.split("\n"))
 
-    res shouldBe a [Xor.Right[Bunsetsu]]
+    res shouldBe a [Xor.Right[_]]
     val bnst = res.getOrElse(throw new Exception("Should not happen"))
 
     bnst.parentId shouldBe -1
@@ -88,7 +88,7 @@ class KNPParserTest extends FunSuite with Matchers {
         .stripMargin.split("\n")
     val parser = new KNPParser()
     val res = parser.parseBunsetsu(bunsetsuString)
-    res shouldBe a [Xor.Left[ParseException]]
+    res shouldBe a [Xor.Left[_]]
   }
 
   test("testParseTag") {
@@ -100,7 +100,7 @@ class KNPParserTest extends FunSuite with Matchers {
 
     val parser = new KNPParser()
     val res = parser.parseTag(tagStr)
-    res shouldBe a [Xor.Right[Tag]]
+    res shouldBe a [Xor.Right[_]]
     val tag = res.getOrElse(throw new Exception("Should not happen"))
 
     tag.dpndtype shouldBe "D"
@@ -118,7 +118,7 @@ class KNPParserTest extends FunSuite with Matchers {
 
     val parser = new KNPParser()
     val res = parser.parseTag(tagStr)
-    res shouldBe a [Xor.Left[ParseException]]
+    res shouldBe a [Xor.Left[_]]
   }
 
   test("parseFeatures") {
@@ -127,7 +127,7 @@ class KNPParserTest extends FunSuite with Matchers {
     val (f,_,_) = parser.parseFeatures(tagStr)
     f("BGH") shouldBe "構文/こうぶん"
     f("係") shouldBe "文節内"
-    f.get("先行詞候補") shouldBe a [Some[String]]
+    f.get("先行詞候補") should be ('defined)
     f.get("dummy") shouldBe None
     f("正規化代表表記") shouldBe "構文/こうぶん"
   }
@@ -162,7 +162,7 @@ class KNPParserTest extends FunSuite with Matchers {
       """.stripMargin.replace("\n","")
 
     val parser = new KNPParser()
-    val (f, rels, None) = parser.parseFeatures(tagStr)
+    val (_, rels, None) = parser.parseFeatures(tagStr)
     rels should have size 3
     val rel = rels.head
 
