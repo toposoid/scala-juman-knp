@@ -11,7 +11,7 @@ In your `build.sbt`:
 ```
 resolvers += "en-japan Maven OSS" at "http://dl.bintray.com/en-japan/maven-oss"
 
-libraryDepencies += "com.enjapan" %% "scala-juman-knp" % "0.0.1"
+libraryDependencies += "com.enjapan" %% "scala-juman-knp" % "0.0.1"
 ```
 
 ## How to use
