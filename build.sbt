@@ -2,7 +2,7 @@ import scoverage.ScoverageSbtPlugin.ScoverageKeys._
 
 name := "scala-juman-knp"
 description := "Scala wrapper around JUMAN and KNP."
-version := "0.0.1"
+version := "0.0.2"
 organization := "com.enjapan"
 
 scalaVersion := "2.11.7"
