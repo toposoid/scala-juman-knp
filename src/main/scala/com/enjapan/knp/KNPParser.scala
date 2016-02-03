@@ -70,7 +70,7 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r ) {
     for {
       morphemes <- (lines.drop(1) map JumanParser.parseMorpheme).toList.sequenceU
       otag = parseLine(lines.head, KNPParser.TAG_REGEX).map { case (parentId, dpndtype, fstring) =>
-        val (features, rels, pas) = parseFeatures(fstring, ignoreFirstCharacter = false)
+        val (features, rels, pas) = parseFeatures(fstring)
         Tag(parentId, dpndtype, fstring, morphemes, features, rels, pas)
       }
       res <- Xor.fromOption(otag, ParseException(s"Illegal tag spec: $lines"))
@@ -93,9 +93,9 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r ) {
     recParse(lines, Xor.right(List.empty)).map(_.reverse)
   }
 
-  def parseFeatures(fstring: String, ignoreFirstCharacter: Boolean): (Map[String,String], List[Rel], Option[Pas]) = {
+  def parseFeatures(fstring: String): (Map[String,String], List[Rel], Option[Pas]) = {
 
-    val spec: String = fstring.replaceAll("\\s+$", "")
+    val spec: String = fstring.replaceAll("\\s+$", "").drop(1).dropRight(1)
 
     spec.split("><").foldLeft((Map.empty[String, String], List.empty[Rel], Option.empty[Pas])) {
       case ((features, rels, pas), feature) =>
@@ -103,25 +103,25 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r ) {
           (features, rels ++ parseRel(feature), pas)
         }
         else {
-          val (key, value) = feature.span(_ != ':')
+          val (key, v) = feature.span(_ != ':')
+          val value = v.drop(1)
           (features + (key -> value), rels, if (key == "格解析結果") parsePAS(value) else pas)
         }
     }
   }
 
   def parsePAS(value: String): Option[Pas] = {
-    val cs = value.split(":")
-    if (cs.length < 3) {
-      None
-    }
-    else {
-      val cfid: String = cs(0) + cs(1)
-      val arguments = mutable.Map[String, Argument]()
-      for {
-        k <- cs.drop(2).mkString("").split(";")
-        items = k.split("/") if !(items(1) == "U") && !(items(1) == "-") && items.size > 5
-      } { arguments.put(items(0), Argument(items(0), items(1), items(2), items(3).toInt, items(5))) }
-      Some(Pas(cfid, arguments.toMap))
+    val cs = value.split(":").toList
+    cs match {
+      case c0::c1::c2 =>
+        val cfid: String = c0 + ":" + c1
+        val arguments = mutable.Map[String, Argument]()
+        for {
+          k <- c2.mkString("").split(";")
+          items = k.split("/") if !(items(1) == "U") && !(items(1) == "-") && items.size > 5
+        } { arguments.put(items(0), Argument(items(0), items(1), items(2), items(3).toInt, items(5))) }
+        Some(Pas(cfid, arguments.toMap))
+      case _ => None
     }
   }
 
@@ -130,21 +130,28 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r ) {
     KNPParser.REL_REGEX
       .findAllMatchIn(fstring)
       .collectFirst {
-        case m if m.subgroups.size >= 4 && m.subgroups(1) != "？" => m.subgroups match {
-          case atype :: mode :: target :: sid :: rest =>
-            Rel(atype, target, sid, mode, rest.headOption.map(_.toInt))
-        }
+        case m if m.group(4) != null && m.group(2) != "？" =>
+          Rel(`type` = m.group(1),
+            target = m.group(3),
+            sid = m.group(4),
+            id = Option(m.group(5)).map(_.toInt),
+            mode = Option(m.group(2))
+          )
 
-        case m if considerWriterReader && m.subgroups.size >= 3 &&
-          m.subgroups(1) != "？" &&
-          (considerWriterReader && {
-            val target = m.subgroups(2)
-            target != "なし" && KNPParser.WRITER_READER_LIST.contains(target) || KNPParser.WRITER_READER_CONV_LIST.contains(target)
-          }) => m.subgroups match {
-          case atype :: mode :: target :: rest =>
+        case m if considerWriterReader && m.group(2) != "？" &&
+          {
+            val target = m.group(3)
+            target != "なし" && KNPParser.WRITER_READER_LIST.contains(target) || KNPParser.WRITER_READER_CONV_LIST
+              .contains(target)
+          } =>
+          val target = m.group(3)
             val t = if (KNPParser.WRITER_READER_LIST.contains(target)) target else KNPParser.WRITER_READER_CONV_LIST(target)
-            Rel(atype, t, "", mode, None)
-        }
+            Rel(`type` = m.group(1),
+            target = t,
+            sid = "",
+            id = None,
+            mode = Option(m.group(2))
+          )
       }
   }
 

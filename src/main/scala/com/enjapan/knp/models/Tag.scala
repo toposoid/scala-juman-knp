@@ -18,8 +18,8 @@ case class Rel(
   `type`: String,
   target: String,
   sid: String,
-  mode: String,
-  id: Option[Int]
+  id: Option[Int],
+  mode: Option[String]
 )
 
 case class Tag(
@@ -32,5 +32,7 @@ case class Tag(
   pas:Option[Pas]) extends KNPNode[Tag] {
 
   def repName:Option[String] = features.get("正規化代表表記")
+
+  def surface:String = morphemes.map(_.midasi).mkString
 
 }

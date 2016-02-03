@@ -12,6 +12,14 @@ case class BList(pattern:String, comment: String, sid:String, bunsetsuList: Inde
     } yield tag
   }
 
+  lazy val morphemeList = {
+    for{
+      bnst <- bunsetsuList
+      tag <- bnst.tags
+      morpheme <- tag.morphemes
+    } yield morpheme
+  }
+
   def setParentChild() =  {
     for (bnst <- bunsetsuList) {
 
@@ -29,7 +37,7 @@ case class BList(pattern:String, comment: String, sid:String, bunsetsuList: Inde
           tag.parent = None
         }
         else {
-          val parent = tagList(bnst.parentId)
+          val parent = tagList(tag.parentId)
           tag.parent = Some(parent)
           parent.addChild(tag)
         }
