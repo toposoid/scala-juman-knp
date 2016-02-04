@@ -18,7 +18,6 @@ scalacOptions ++= Seq(
     "-Ywarn-nullary-override",
     "-Ywarn-nullary-unit",
     "-Ywarn-numeric-widen",
-    "-Ywarn-unused",
     "-Ywarn-unused-import",
     "-Ywarn-value-discard",
     "-target:jvm-1.7",
