@@ -1,5 +1,3 @@
-import scoverage.ScoverageSbtPlugin.ScoverageKeys._
-
 name := "scala-juman-knp"
 description := "Scala wrapper around JUMAN and KNP."
 organization := "com.enjapan"
@@ -26,7 +24,7 @@ scalacOptions ++= Seq(
 libraryDependencies += "org.typelevel" %% "cats" % "0.4.0"
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 
-coverageExcludedPackages := "com.enjapan.knp.KNP"
+scoverage.ScoverageSbtPlugin.ScoverageKeys.coverageExcludedPackages := "com.enjapan.knp.KNP"
 
 bintrayOrganization := Some("en-japan")
 bintrayRepository := "maven-oss"

@@ -13,7 +13,7 @@ script:
 - find $HOME/.sbt -name "*.lock" | xargs rm
 - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
 after_success:
-- sbt coveralls
+- pip install --user codecov && codecov
 - test "${TRAVIS_TAG}" && sh "$TRAVIS_BUILD_DIR/.travis.credentials.sh" && sbt publish
 env:
   global:
