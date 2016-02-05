@@ -23,7 +23,8 @@ object KNPParser {
   val SID_REGEX = """# S-ID:([^\s]*).*$""".r
   val BUNSETSU_REGEX = """\* (-?\d+)([DPIA])(.*)$""".r
   val TAG_REGEX = """\+ (-?\d+)(\w)(.*)$""".r
-  val REL_REGEX = """rel type=\"([^\s]+?)\"(?: mode=\"([^>]+?)\")? target=\"([^\s]+?)\"(?: sid=\"(.+?)\" id=\"(.+?)\")?/""".r
+  val REL_REGEX =
+    """rel type=\"([^\s]+?)\"(?: mode=\"([^>]+?)\")? target=\"([^\s]+?)\"(?: sid=\"(.+?)\" id=\"(.+?)\")?/""".r
   val WRITER_READER_LIST = Set("著者", "読者")
   val WRITER_READER_CONV_LIST = Map("一人称" -> "著者", "二人称" -> "読者")
 }
@@ -114,7 +115,16 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r) {
         for {
           k <- c2.mkString("").split(";")
           items = k.split("/") if !(items(1) == "U") && !(items(1) == "-") && items.size > 5
-        } {arguments.put(items(0), PredicateArgumentAnalysis(items(0), items(1), items(2), items(3).toInt, items(5)))}
+        } {
+          arguments.put(items(0),
+            PredicateArgumentAnalysis(
+              relationName = items(0),
+              relationType = items(1),
+              argWord = items(2),
+              argId = items(3).toInt,
+              argSentId = items(5)
+            ))
+        }
         Some(Pas(cfid, arguments.toMap))
       case _ => None
     }

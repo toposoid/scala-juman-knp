@@ -151,9 +151,10 @@ class KNPParserTest extends FunSuite with Matchers {
     pas.cfid shouldBe "分/ふん:判1"
     val args = pas.arguments
     args should have size 2
-    args("デ").argNo shouldBe 1
-    args("デ").caseType shouldBe "C"
-    args("デ").arg shouldBe "車"
+    args("デ").relationName shouldBe "デ"
+    args("デ").relationType shouldBe "C"
+    args("デ").argId shouldBe 1
+    args("デ").argWord shouldBe "車"
     args("デ").argSentId shouldBe "14"
     args.get("ガ") shouldBe None
   }

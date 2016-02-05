@@ -8,11 +8,19 @@ import com.enjapan.juman.models.Morpheme
 case class Pas(cfid: String, arguments: Map[String, PredicateArgumentAnalysis])
 
 case class PredicateArgumentAnalysis(
-  `case`: String,
-  caseType: String,
-  arg: String,
-  argNo:Int,
-  argSentId:String)
+  relationName: String,
+  relationType: String,
+  argWord: String,
+  argId:Int,
+  argSentId:String) {
+
+  private var _arg:Tag = null
+
+  protected[knp] def arg_=(tag:Tag): Unit = {
+    _arg = tag
+  }
+
+}
 
 case class Rel(
   `type`: String,
