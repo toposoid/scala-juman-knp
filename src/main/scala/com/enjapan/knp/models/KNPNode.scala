@@ -5,8 +5,8 @@ package com.enjapan.knp.models
   */
 
 sealed trait PAType
-case object Predicate extends PAType
-case class Argument(argType:String) extends PAType
+case object Argument extends PAType
+case class Predicate(predicateType:String) extends PAType
 
 abstract class KNPNode[T <: KNPNode[T]] { self:T =>
 

@@ -181,9 +181,9 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r) {
       (parentId, dpndtype, fstring) = r
       (features, rels) = parseFeatures(fstring)
       paType <- if (features.contains("用言")) {
-        Argument(features("用言")).right
+        Predicate(features("用言")).right
       } else if (features.contains("体言")) {
-        Predicate.right
+        Argument.right
       } else ParseException("Could not find PAType in " + l).left
       pas = features.get("格解析結果").flatMap(parsePAS)
     } yield (parentId, dpndtype, fstring, features, paType, rels, pas)
