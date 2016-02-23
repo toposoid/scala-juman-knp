@@ -5,6 +5,7 @@ import com.enjapan.knp.models.BList
 import scala.language.postfixOps
 
 import sys.process._
+import com.enjapan.helpers._
 
 /**
   * Created by Ugo Bataillard on 2/2/16.
