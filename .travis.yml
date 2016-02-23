@@ -10,12 +10,13 @@ cache:
   - "$HOME/.ivy2/cache"
   - "$HOME/.sbt/boot/"
 script:
-- sbt ++$TRAVIS_SCALA_VERSION clean coverage "+ test"
-- find $HOME/.sbt -name "*.lock" | xargs rm
-- find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+- sbt ++$TRAVIS_SCALA_VERSION clean coverage test
+before_cache:
+- find $HOME/.sbt -name "*.lock" -delete
+- find $HOME/.ivy2 -name "ivydata-*.properties" -delete
 after_success:
-- sbt coveralls
-- test "${TRAVIS_TAG}" && sh "$TRAVIS_BUILD_DIR/.travis.credentials.sh" && sbt "+ publish"
+- sbt ++$TRAVIS_SCALA_VERSION coveralls
+- test "${TRAVIS_TAG}" && sh "$TRAVIS_BUILD_DIR/.travis.credentials.sh" && sbt ++$TRAVIS_SCALA_VERSION publish
 env:
   global:
   - secure: Cqutl7oxba2Ctzqv4NlQE4e6UZNKxY4cP4NfFSfRm1UU7UQRlQ/avneySlCvVVbDIbuIoJAU8/HIgB3W8ZHf8rc3EkNjmGeTQOzG84BR5gZY+UM/PD6uFBoIj8jU2xsQ5qEEmdUO7gw4jFHGTFH6USZXt3AKWUF8L2k+CVJ/GV1DS99pGjCPCzhiGF9XwJGFlwM8akOif6TODpFrZxfgy/cGXFDccQlnmfbrl9dLouShGVPUCAkVM0mxWwVtu5vRZMKcOKCJG8vy5twFbwEVVMJvrs9QFDWwfLYR/LIk+s+jdDLP46CUESbuXWlZgyOgMelNMlVCAbLWON0kGGETccYgGH/xagtWRyltDPgysoDQdaLHpu8+iNpgS4lLtpN9zngMap4tbwVT9R3vBX+wjGzV0FeoAEVCUttFgoM+6AxJ46tsdxOqDQ8D7f5u7AVYdAohb8xH58HANknlNH6l6hFQQtPMqHn9GCbf9KJvQXI+BHOgbGH9VPekCgOEo1GwyxknswM2agoEDAMyfGiVIDMTUwgmZ8H2Qh0puwJ0eQBYU3q1mG1Tmf7VaZeGGRaHGmJYO8tfh9/D/e0kBEHT7RaXyRr2/FJgU9v91eu8u6lKZtIpbBu/1AH2MqVKnGLFI/9Ulzi4uyv/ftPG0BAle99YSnXHqEO5pYvmxJ5YM8A=
