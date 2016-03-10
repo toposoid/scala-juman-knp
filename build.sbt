@@ -1,5 +1,3 @@
-import scoverage.ScoverageSbtPlugin.ScoverageKeys._
-
 name := "scala-juman-knp"
 description := "Scala wrapper around JUMAN and KNP."
 organization := "com.enjapan"
