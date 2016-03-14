@@ -186,6 +186,14 @@ class KNPParserTest extends FunSuite with Matchers {
     args.get("ガ") shouldBe None
   }
 
+  test("testParseEmptyPAS"){
+    val pasStr = "?/?:判0"
+    val parser = new KNPParser()
+    val (Some(pas)) = parser.parsePAS(pasStr)
+    pas.cfid shouldBe "?/?:判0"
+    pas.arguments should be ('empty)
+  }
+
   test("testParseRels") {
 
     val tagStr =
