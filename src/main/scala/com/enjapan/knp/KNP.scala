@@ -25,7 +25,7 @@ object KNP {
 
 
   def main(args: Seq[String]): Unit = {
-    val knp = new KNP
+    val knp = new KNPCli
     knp(args.head) match {
       case Xor.Left(e) => throw e
       case Xor.Right(bList) =>
@@ -57,14 +57,18 @@ object KNP {
       f(c)
     }
   }
-
 }
 
-class KNP(knpCommand: Seq[String] = KNP.KNP_PATH +: KNP.KNP_FLAGS, jumanCommand: Seq[String] = Seq(juman.Juman
-  .JUMAN_PATH)) {
+trait KNP {
   val parser = new KNPParser()
+  def apply(text:String) = parse(text)
+  def parse(text:String): Xor[ParseException, BList]
+}
 
-  def apply(text: String): Xor[ParseException, BList] = {
+class KNPCli(knpCommand: Seq[String] = KNP.KNP_PATH +: KNP.KNP_FLAGS, jumanCommand: Seq[String] = Seq(juman.Juman
+  .JUMAN_PATH)) extends KNP {
+
+  override def parse(text: String): Xor[ParseException, BList] = {
     val lines = Seq("echo", text) #| jumanCommand #| knpCommand lineStream
 
     parser.parse(lines)

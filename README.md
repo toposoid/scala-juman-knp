@@ -21,7 +21,7 @@ Example:
 ```scala
 import com.enjapan.knp.KNP
 
-val knp = new KNP()
+val knp = new KNPCli()
 val blist = knp("京都大学に行った。")
 
 blist.root.traverse(println)
