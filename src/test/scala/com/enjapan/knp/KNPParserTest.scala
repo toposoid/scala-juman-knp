@@ -12,21 +12,21 @@ class KNPParserTest extends FunSuite with Matchers {
   test("testParse") {
     val knpOutput =
       """# S-ID:123 KNP:4.2-ffabecc DATE:2015/04/10 SCORE:-18.02647
-         |* 1D <BGH:解析/かいせき><文頭><サ変><助詞><連体修飾><体言>
-         |+ 1D <BGH:構文/こうぶん><文節内><係:文節内><文頭><体言>
-         |構文 こうぶん 構文 名詞 6 普通名詞 1 * 0 * 0 "代表表記:構文/こうぶん カテゴリ:抽象物" <代表表記:構文/こうぶん>
-         |+ 2D <BGH:解析/かいせき><助詞><連体修飾><体言>
-         |解析 かいせき 解析 名詞 6 サ変名詞 2 * 0 * 0 "代表表記:解析/かいせき カテゴリ:抽象物 ドメイン:教育・学習;科学・技術" <代表表記:解析/かいせき>
-         |の の の 助詞 9 接続助詞 3 * 0 * 0 NIL <かな漢字><ひらがな><付属>
-         |* 2D <BGH:実例/じつれい><ヲ><助詞><体言><係:ヲ格>
-         |+ 3D <BGH:実例/じつれい><ヲ><助詞><体言><係:ヲ格>
-         |実例 じつれい 実例 名詞 6 普通名詞 1 * 0 * 0 "代表表記:実例/じつれい カテゴリ:抽象物" <代表表記:実例/じつれい>
-         |を を を 助詞 9 格助詞 1 * 0 * 0 NIL <かな漢字><ひらがな><付属>
-         |* -1D <BGH:示す/しめす><文末><句点><用言:動>
-         |+ -1D <BGH:示す/しめす><文末><句点><用言:動>
-         |示す しめす 示す 動詞 2 * 0 子音動詞サ行 5 基本形 2 "代表表記:示す/しめす" <代表表記:示す/しめす><正規化代表表記:示す/しめす>
-         |。 。 。 特殊 1 句点 1 * 0 * 0 NIL <英記号><記号><文末><付属>
-         |EOS""".stripMargin
+        |* 1D <BGH:解析/かいせき><文頭><サ変><助詞><連体修飾><体言>
+        |+ 1D <BGH:構文/こうぶん><文節内><係:文節内><文頭><体言>
+        |構文 こうぶん 構文 名詞 6 普通名詞 1 * 0 * 0 "代表表記:構文/こうぶん カテゴリ:抽象物" <代表表記:構文/こうぶん>
+        |+ 2D <BGH:解析/かいせき><助詞><連体修飾><体言>
+        |解析 かいせき 解析 名詞 6 サ変名詞 2 * 0 * 0 "代表表記:解析/かいせき カテゴリ:抽象物 ドメイン:教育・学習;科学・技術" <代表表記:解析/かいせき>
+        |の の の 助詞 9 接続助詞 3 * 0 * 0 NIL <かな漢字><ひらがな><付属>
+        |* 2D <BGH:実例/じつれい><ヲ><助詞><体言><係:ヲ格>
+        |+ 3D <BGH:実例/じつれい><ヲ><助詞><体言><係:ヲ格>
+        |実例 じつれい 実例 名詞 6 普通名詞 1 * 0 * 0 "代表表記:実例/じつれい カテゴリ:抽象物" <代表表記:実例/じつれい>
+        |を を を 助詞 9 格助詞 1 * 0 * 0 NIL <かな漢字><ひらがな><付属>
+        |* -1D <BGH:示す/しめす><文末><句点><用言:動>
+        |+ -1D <BGH:示す/しめす><文末><句点><用言:動>
+        |示す しめす 示す 動詞 2 * 0 子音動詞サ行 5 基本形 2 "代表表記:示す/しめす" <代表表記:示す/しめす><正規化代表表記:示す/しめす>
+        |。 。 。 特殊 1 句点 1 * 0 * 0 NIL <英記号><記号><文末><付属>
+        |EOS""".stripMargin
 
     val parser = new KNPParser()
 
@@ -55,10 +55,37 @@ class KNPParserTest extends FunSuite with Matchers {
     bunsetsuList(2).parentId shouldBe -1
     bunsetsuList(2).parent shouldBe None
     bunsetsuList(1).children should contain theSameElementsAs Seq(bunsetsuList(0))
-    bunsetsuList(0).children should be ('empty)
+    bunsetsuList(0).children should be('empty)
 
     tagList(1).parent.get shouldBe tagList(2)
     tagList(2).children should contain theSameElementsAs Seq(tagList(1))
+  }
+
+  test("testParseWeird") {
+
+    val knpOutput =
+      """# S-ID:1 KNP:4.2-1255337 DATE:2016/03/14 SCORE:-21.45878
+        |* 1D <BGH:サイト/さいと><文頭><ガ><助詞><体言><係:ガ格><区切:0-0><格要素><連用要素><正規化代表表記:サイト/さいと><主辞代表表記:サイト/さいと>
+        |+ 1D <BGH:サイト/さいと><文頭><ガ><助詞><体言><係:ガ格><区切:0-0><格要素><連用要素><名詞項候補><先行詞候補><正規化代表表記:サイト/さいと><解析格:ガ>
+        |サイト さいと サイト 名詞 6 普通名詞 1 * 0 * 0 "代表表記:サイト/さいと カテゴリ:場所-その他 ドメイン:家庭・暮らし" <代表表記:サイト/さいと><カテゴリ:場所-その他><ドメイン:家庭・暮らし><正規化代表表記:サイト/さいと><記英数カ><カタカナ><名詞相当語><文頭><自立><内容語><タグ単位始><文節始><固有キー><文節主辞>
+        |が が が 助詞 9 格助詞 1 * 0 * 0 NIL <かな漢字><ひらがな><付属>
+        |* 2D <BGH:する/する><サ変><サ変動詞><時制-過去><連体修飾><用言:動><係:連格><レベル:B><区切:0-5><ID:（動詞連体）><連体節><動態述語><正規化代表表記:リニューアル/りにゅーある><主辞代表表記:リニューアル/りにゅーある>
+        |+ 2D <BGH:する/する><サ変動詞><時制-過去><連体修飾><用言:動><係:連格><レベル:B><区切:0-5><ID:（動詞連体）><連体節><動態述語><サ変><正規化代表表記:リニューアル/りにゅーある><用言代表表記:リニューアル/りにゅーある><格関係0:ガ:サイト><格関係2:外の関係:?><格解析結果:リニューアル/りにゅーある:動3:ガ/C/サイト/0/0/1;ヲ/U/-/-/-/-;ニ/U/-/-/-/-;ノ/U/-/-/-/-;外の関係/N/?/2/0/1>
+        |リニューアル りにゅーある リニューアル 名詞 6 サ変名詞 2 * 0 * 0 "代表表記:リニューアル/りにゅーある カテゴリ:抽象物 ドメイン:ビジネス" <代表表記:リニューアル/りにゅーある><カテゴリ:抽象物><ドメイン:ビジネス><正規化代表表記:リニューアル/りにゅーある><記英数カ><カタカナ><名詞相当語><サ変><サ変動詞><自立><内容語><タグ単位始><文節始><固有キー><文節主辞>
+        |した した する 動詞 2 * 0 サ変動詞 16 タ形 10 "代表表記:する/する 付属動詞候補（基本） 自他動詞:自:成る/なる" <代表表記:する/する><付属動詞候補（基本）><自他動詞:自:成る/なる><正規化代表表記:する/する><かな漢字><ひらがな><活用語><とタ系連用テ形複合辞><付属>
+        |ような ような ようだ 助動詞 5 * 0 ナ形容詞 21 ダ列基本連体形 3 NIL <かな漢字><ひらがな><活用語><付属>
+        |* -1D <文末><体言><用言:判><体言止><レベル:C><区切:5-5><ID:（文末）><裸名詞><提題受:30><主節><状態述語><正規化代表表記:?/?><主辞代表表記:?/?>
+        |+ -1D <文末><体言><用言:判><体言止><レベル:C><区切:5-5><ID:（文末）><裸名詞><提題受:30><主節><状態述語><判定詞句><名詞項候補><先行詞候補><正規化代表表記:?/?><用言代表表記:?/?><時制-無時制><解析連格:外の関係><格解析結果:?/?:判0>
+        |? ? ? 名詞 6 普通名詞 1 * 0 * 0 "疑似代表表記 代表表記:?/? 品詞変更:?-?-?-15-1-0-0" <疑似代表表記><代表表記:?/?><正規化代表表記:?/?><品詞変更:?-?-?-15-1-0-0-"疑似代表表記 代表表記:?/?"><品曖-その他><未知語><記英数カ><英記号><記号><名詞相当語><文末><表現文末><自立><内容語><タグ単位始><文節始><文節主辞>
+        |EOS
+      """.stripMargin
+
+
+    val parser = new KNPParser()
+
+    val res = parser.parse(knpOutput.split("\n"))
+    res.isRight shouldBe true
+    val blist = res.getOrElse(throw new Exception("Should not happen"))
   }
 
   test("testParseBunsetsu") {
@@ -73,7 +100,7 @@ class KNPParserTest extends FunSuite with Matchers {
 
     val res = parser.parseBunsetsu(bunsetsuString.split("\n"))
 
-    res shouldBe a [Xor.Right[_]]
+    res shouldBe a[Xor.Right[_]]
     val bnst = res.getOrElse(throw new Exception("Should not happen"))
 
     bnst.parentId shouldBe -1
@@ -96,7 +123,7 @@ class KNPParserTest extends FunSuite with Matchers {
         .stripMargin.split("\n")
     val parser = new KNPParser()
     val res = parser.parseBunsetsu(bunsetsuString)
-    res shouldBe a [Xor.Left[_]]
+    res shouldBe a[Xor.Left[_]]
   }
 
   test("testParseTag") {
@@ -108,7 +135,7 @@ class KNPParserTest extends FunSuite with Matchers {
 
     val parser = new KNPParser()
     val res = parser.parseTag(tagStr)
-    res shouldBe a [Xor.Right[_]]
+    res shouldBe a[Xor.Right[_]]
     val tag = res.getOrElse(throw new Exception("Should not happen"))
 
     tag.dpndtype shouldBe "D"
@@ -128,16 +155,16 @@ class KNPParserTest extends FunSuite with Matchers {
 
     val parser = new KNPParser()
     val res = parser.parseTag(tagStr)
-    res shouldBe a [Xor.Left[_]]
+    res shouldBe a[Xor.Left[_]]
   }
 
   test("parseFeatures") {
     val tagStr = "<BGH:構文/こうぶん><文節内><係:文節内><文頭><体言><名詞項候補><先行詞候補><正規化代表表記:構文/こうぶん>"
     val parser = new KNPParser()
-    val (f,_) = parser.parseFeatures(tagStr)
+    val (f, _) = parser.parseFeatures(tagStr)
     f("BGH") shouldBe "構文/こうぶん"
     f("係") shouldBe "文節内"
-    f.get("先行詞候補") should be ('defined)
+    f.get("先行詞候補") should be('defined)
     f.get("dummy") shouldBe None
     f("正規化代表表記") shouldBe "構文/こうぶん"
   }
@@ -166,7 +193,7 @@ class KNPParserTest extends FunSuite with Matchers {
         |<rel type="ヲ" target="衆院" sid="950101003-002" id="3"/>
         |<rel type="ガ" target="不特定:人1"/>
         |<rel type="時間" target="国会前" sid="950101003-asd" id="16"/>
-      """.stripMargin.replace("\n","")
+      """.stripMargin.replace("\n", "")
 
     val parser = new KNPParser()
     val (_, rels) = parser.parseFeatures(tagStr)

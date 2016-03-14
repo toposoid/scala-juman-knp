@@ -113,8 +113,8 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r) {
         val cfid: String = c0 + ":" + c1
         val arguments = mutable.Map[String, PredicateArgumentAnalysis]()
         for {
-          k <- c2.mkString("").split(";")
-          items = k.split("/") if !(items(1) == "U") && !(items(1) == "-") && items.size > 5
+          k <- c2.mkString("").split(";") if !c2.isEmpty
+          items = k.split("/") if items.size > 5 && items(1) != "U" && items(1) != "-"
         } {
           arguments.put(items(0),
             PredicateArgumentAnalysis(
