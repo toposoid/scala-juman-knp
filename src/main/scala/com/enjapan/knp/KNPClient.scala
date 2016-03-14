@@ -11,9 +11,14 @@ class KNPClient(jumanClient: JumanClient, in: InputStream, out:OutputStream) ext
   val command = "RUN -tab"
 
   override def parse(text: String): Xor[ParseException, BList] = {
-    val jumanRes = jumanClient.run(Iterator(text))
-    val knpRes = run(jumanRes)
-    parser.parse(knpRes.toIterable)
+    val cleaned = text.replace("\n","").trim
+    if (cleaned.isEmpty) {
+     Xor.left(ParseException("Can not parse empty strings"))
+    } else {
+      val jumanRes = jumanClient.run(Iterator(cleaned))
+      val knpRes = run(jumanRes)
+      parser.parse(knpRes.toIterable)
+    }
   }
 }
 
