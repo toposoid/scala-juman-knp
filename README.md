@@ -11,11 +11,12 @@ In your `build.sbt`:
 ```
 resolvers += "en-japan Maven OSS" at "http://dl.bintray.com/en-japan/maven-oss"
 
-libraryDependencies += "com.enjapan" %% "scala-juman-knp" % "0.0.1"
+libraryDependencies += "com.enjapan" %% "scala-juman-knp" % "0.0.5"
 ```
 
 ## How to use
 
+### Normal mode
 Example:
 ```scala
 import com.enjapan.knp.KNP
@@ -25,3 +26,16 @@ val blist = knp("京都大学に行った。")
 
 blist.root.traverse(println)
 ```
+
+### Server mode
+```scala
+import com.enjapan.knp.KNP
+
+KNP.withServerBackedClient { knp =>
+  (1 to 1000).foreach { _ =>
+    val blist = knp.parse("京都大学に行った。")
+    blist.root.traverse(println)
+  }
+}
+```
+
