@@ -60,17 +60,17 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r) {
   def parseBunsetsu(lines: Iterable[String]): ParseException Xor Bunsetsu = {
     for {
       r <- parseLine(lines.head, KNPParser.BUNSETSU_REGEX)
-      (parentId, dpndtype, fstring, features, paType, s, ss) = r
+      (parentId, dpndtype, fstring, features, paTypes, s, ss) = r
       tags <- parseKNPNodeLines[Tag]("+", lines.drop(1), parseTag)
-    } yield Bunsetsu(parentId, dpndtype, fstring, paType, features, tags)
+    } yield Bunsetsu(parentId, dpndtype, fstring, paTypes, features, tags)
   }
 
   def parseTag(lines: Iterable[String]): Xor[ParseException, Tag] = {
     for {
       r <- parseLine(lines.head, KNPParser.TAG_REGEX)
-      (parentId, dpndtype, fstring, features, paType, rels, pas) = r
+      (parentId, dpndtype, fstring, features, paTypes, rels, pas) = r
       morphemes <- (lines.drop(1) map JumanParser.parseMorpheme).toList.sequenceU
-    } yield Tag(parentId, dpndtype, fstring, paType, morphemes, features, rels, pas)
+    } yield Tag(parentId, dpndtype, fstring, paTypes, morphemes, features, rels, pas)
   }
 
   def parseKNPNodeLines[T](
@@ -160,7 +160,7 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r) {
       }
   }
 
-  def parseLine(line: String, linePattern: Regex): Xor[ParseException, (Int, String, String, Map[String, String], PAType, List[Rel], Option[Pas])] = {
+  def parseLine(line: String, linePattern: Regex): Xor[ParseException, (Int, String, String, Map[String, String], List[PAType], List[Rel], Option[Pas])] = {
     val l = line.trim
     val headers = Xor.fromOption({
       if (l.length == 1) {
@@ -176,17 +176,12 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r) {
       }
     }, ParseException(s"Illegal KNP node spec: " + l))
 
-    for {
-      r <- headers
-      (parentId, dpndtype, fstring) = r
-      (features, rels) = parseFeatures(fstring)
-      paType <- if (features.contains("用言")) {
-        Predicate(features("用言")).right
-      } else if (features.contains("体言")) {
-        Argument.right
-      } else ParseException("Could not find PAType in " + l).left
-      pas = features.get("格解析結果").flatMap(parsePAS)
-    } yield (parentId, dpndtype, fstring, features, paType, rels, pas)
+    headers.map { case (parentId, dpndtype, fstring)  =>
+      val (features, rels) = parseFeatures(fstring)
+      val paTypes = List.empty ++ features.get("用言").map(Predicate.apply) ++ features.get("体言").map(_ => Argument)
+      val pas = features.get("格解析結果").flatMap(parsePAS)
+      (parentId, dpndtype, fstring, features, paTypes, rels, pas)
+    }
   }
 }
 

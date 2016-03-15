@@ -45,9 +45,9 @@ class KNPParserTest extends FunSuite with Matchers {
     morphemeList.map(_.midasi).mkString("") shouldBe "構文解析の実例を示す。"
     blist.sid shouldBe "123"
 
-    bunsetsuList(0).paType shouldBe Argument
-    bunsetsuList(1).paType shouldBe Argument
-    bunsetsuList(2).paType shouldBe Predicate("動")
+    bunsetsuList(0).paTypes should contain theSameElementsAs List(Argument)
+    bunsetsuList(1).paTypes should contain theSameElementsAs List(Argument)
+    bunsetsuList(2).paTypes should contain theSameElementsAs List(Predicate("動"))
 
     // Check parent / children relations
     bunsetsuList(1).parentId shouldBe 2
@@ -105,7 +105,7 @@ class KNPParserTest extends FunSuite with Matchers {
 
     bnst.parentId shouldBe -1
     bnst.dpndtype shouldBe "D"
-    bnst.paType shouldBe Predicate("判")
+    bnst.paTypes should contain theSameElementsAs List(Predicate("判"), Argument)
     bnst.repName shouldBe None
     bnst.features should have size 8
     bnst.tags should have size 2
@@ -142,7 +142,7 @@ class KNPParserTest extends FunSuite with Matchers {
     tag.parentId shouldBe 1
     tag.morphemes should have size 2
     tag.surface shouldBe "構文解析"
-    tag.paType shouldBe Argument
+    tag.paTypes should contain theSameElementsAs List(Argument)
     tag.repName shouldBe Some("構文/こうぶん")
   }
 

@@ -7,7 +7,7 @@ case class Bunsetsu(
   parentId: Int,
   dpndtype: String,
   fstring: String,
-  paType: PAType,
+  paTypes: List[PAType],
   features: Map[String,String],
-  tags: Seq[Tag]) extends KNPNode[Bunsetsu]
+  tags: List[Tag]) extends KNPNode[Bunsetsu]
 

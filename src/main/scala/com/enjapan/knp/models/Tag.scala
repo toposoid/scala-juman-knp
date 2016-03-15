@@ -34,10 +34,10 @@ case class Tag(
   parentId:Int,
   dpndtype:String,
   fstring:String,
-  paType:PAType,
-  morphemes: Seq[Morpheme],
+  paTypes:List[PAType],
+  morphemes: List[Morpheme],
   features:Map[String,String],
-  rels: Seq[Rel],
+  rels: List[Rel],
   pas:Option[Pas]) extends KNPNode[Tag] {
 
   def surface:String = morphemes.map(_.midasi).mkString

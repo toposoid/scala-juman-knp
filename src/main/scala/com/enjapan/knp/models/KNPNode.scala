@@ -17,7 +17,7 @@ abstract class KNPNode[T <: KNPNode[T]] { self:T =>
   def children = _children
 
   def features:Map[String,String]
-  def paType:PAType
+  def paTypes: List[PAType]
   def repName:Option[String] = features.get("正規化代表表記")
 
   protected[knp] def parent_=(p:Option[T]): Unit = {
