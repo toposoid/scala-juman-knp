@@ -14,16 +14,15 @@ object Juman {
   val DEFAULT_JUMAN_HOST = "127.0.0.1"
   val DEFAULT_JUMAN_PORT = 32000
 
-  def startServer(command:Seq[String] = JUMAN_PATH +: JUMAN_SERVER_FLAGS) :Process = SocketServer.startServer(command)
-  def withServer[T](command: Seq[String] = JUMAN_PATH +: JUMAN_SERVER_FLAGS)(f: () => T):T = SocketServer.withServer(command)(f)
+  def startServer(command: Seq[String] = JUMAN_PATH +: JUMAN_SERVER_FLAGS): Process = SocketServer.startServer(command)
+  def withServer[T](command: Seq[String] = JUMAN_PATH +: JUMAN_SERVER_FLAGS)(f: () => T): T = SocketServer
+    .withServer(command)(f)
 
-  import SocketClient._
+  def withClient[T](host: String = DEFAULT_JUMAN_HOST, port: Int = DEFAULT_JUMAN_PORT)(f: JumanClient => T) = {
+    val c = new JumanClient(host, port)
+    val res = f(c)
+    c.closeAll()
+    res
 
-  def withClient[T](host:String = DEFAULT_JUMAN_HOST, port:Int = DEFAULT_JUMAN_PORT) (f: JumanClient => T)  = {
-    withSocket(host,port) { s =>
-      val c = new JumanClient(s.getInputStream, s.getOutputStream)
-      c.init()
-      f(c)
-    }
   }
 }

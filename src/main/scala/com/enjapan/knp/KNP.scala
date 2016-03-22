@@ -23,7 +23,6 @@ object KNP {
   val DEFAULT_KNP_HOST = "127.0.0.1"
   val DEFAULT_KNP_PORT = 31000
 
-
   def main(args: Seq[String]): Unit = {
     val knp = new KNPCli
     knp(args.head) match {
@@ -31,6 +30,20 @@ object KNP {
       case Xor.Right(bList) =>
         bList.roots.foreach { _ traverse println }
     }
+  }
+
+  def experiment = {
+    import scala.concurrent.Future
+    import scala.concurrent.ExecutionContext.Implicits.global
+    val juman = new JumanClient(Juman.DEFAULT_JUMAN_HOST, Juman.DEFAULT_JUMAN_PORT)
+    val knp = new KNPClient(juman);
+    Future.sequence((1 to 10).map(_ => Future { (1 to 10).map(_ => knp("時間と交通費返してほしい。")) }))
+  }
+
+  def experiment2 = {
+    val juman = new JumanClient(Juman.DEFAULT_JUMAN_HOST, Juman.DEFAULT_JUMAN_PORT)
+    val knp = new KNPClient(juman);
+    knp("時間と交通費返してほしい。")
   }
 
   def startServer(command: Seq[String] = KNP_PATH +: KNP_SERVER_FLAGS): Process = SocketServer.startServer(command)
@@ -51,11 +64,10 @@ object KNP {
   }
 
   def withClient[T](jumanClient: JumanClient)(host:String, port:Int)(f: KNPClient => T):T = {
-    withSocket(host,port) { s =>
-      val c = new KNPClient(jumanClient, s.getInputStream, s.getOutputStream)
-      c.init()
-      f(c)
-    }
+    val c = new KNPClient(jumanClient, host, port)
+    val res = f(c)
+    c.closeAll()
+    res
   }
 }
 
