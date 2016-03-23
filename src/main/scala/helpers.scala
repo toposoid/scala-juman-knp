@@ -19,7 +19,7 @@ package object helpers {
       *         the predicate `p`.
       * @note Reuse: $consumesAndProducesIterator
       */
-    def takeUntil(p: A => Boolean): Iterator[A] = new AbstractIterator[A] {
+    def takeUntil(p: A => Boolean): Iterator[A] = new Iterator[A] {
       private var hd: A = _
       private var hdDefined: Boolean = false
       private var tail: Iterator[A] = it
