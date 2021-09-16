@@ -1,10 +1,8 @@
-package com.enjapan
-package knp
+package com.enjapan.knp
 
-import juman.{Juman, JumanClient}
-import com.enjapan.backports._
-import cats.data.Xor
+import com.enjapan.juman.{Juman, JumanClient}
 import com.enjapan.SocketClient._
+import com.enjapan.SocketServer
 import com.enjapan.juman.Juman._
 import com.enjapan.knp.models.BList
 
@@ -27,8 +25,8 @@ object KNP {
   def main(args: Seq[String]): Unit = {
     val knp = new KNPCli
     knp(args.head) match {
-      case Xor.Left(e) => throw e
-      case Xor.Right(bList) =>
+      case Left(e) => throw e
+      case Right(bList) =>
         bList.roots.foreach { _ traverse println }
     }
   }
@@ -62,13 +60,13 @@ object KNP {
 trait KNP {
   val parser = new KNPParser()
   def apply(text:String) = parse(text)
-  def parse(text:String): Xor[ParseException, BList]
+  def parse(text:String): Either[ParseException, BList]
 }
 
-class KNPCli(knpCommand: Seq[String] = KNP.KNP_PATH +: KNP.KNP_FLAGS, jumanCommand: Seq[String] = Seq(juman.Juman
+class KNPCli(knpCommand: Seq[String] = KNP.KNP_PATH +: KNP.KNP_FLAGS, jumanCommand: Seq[String] = Seq(com.enjapan.juman.Juman
   .JUMAN_PATH)) extends KNP {
 
-  override def parse(text: String): Xor[ParseException, BList] = {
+  override def parse(text: String): Either[ParseException, BList] = {
     val lines = Seq("echo", text) #| jumanCommand #| knpCommand lineStream
 
     parser.parse(lines)

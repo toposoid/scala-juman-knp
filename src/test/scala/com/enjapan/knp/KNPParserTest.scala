@@ -1,12 +1,12 @@
 package com.enjapan.knp
 
-import cats.data.Xor
 import com.enjapan.knp.models.{Predicate, Argument}
 import org.scalatest.{FunSuite, Matchers}
-
+import scala.Either
 /**
   * Created by Ugo Bataillard on 2/2/16.
   */
+
 class KNPParserTest extends FunSuite with Matchers {
 
   test("testParse") {
@@ -61,6 +61,7 @@ class KNPParserTest extends FunSuite with Matchers {
     tagList(2).children should contain theSameElementsAs Seq(tagList(1))
   }
 
+
   test("testParseWeird") {
 
     val knpOutput =
@@ -100,7 +101,8 @@ class KNPParserTest extends FunSuite with Matchers {
 
     val res = parser.parseBunsetsu(bunsetsuString.split("\n"))
 
-    res shouldBe a[Xor.Right[_]]
+    //res shouldBe a[Right(_)]
+    res.isRight shouldBe true
     val bnst = res.getOrElse(throw new Exception("Should not happen"))
 
     bnst.parentId shouldBe -1
@@ -123,7 +125,7 @@ class KNPParserTest extends FunSuite with Matchers {
         .stripMargin.split("\n")
     val parser = new KNPParser()
     val res = parser.parseBunsetsu(bunsetsuString)
-    res shouldBe a[Xor.Left[_]]
+    res.isLeft shouldBe true
   }
 
   test("testParseTag") {
@@ -135,7 +137,7 @@ class KNPParserTest extends FunSuite with Matchers {
 
     val parser = new KNPParser()
     val res = parser.parseTag(tagStr)
-    res shouldBe a[Xor.Right[_]]
+    res.isRight shouldBe true
     val tag = res.getOrElse(throw new Exception("Should not happen"))
 
     tag.dpndtype shouldBe "D"
@@ -155,7 +157,7 @@ class KNPParserTest extends FunSuite with Matchers {
 
     val parser = new KNPParser()
     val res = parser.parseTag(tagStr)
-    res shouldBe a[Xor.Left[_]]
+    res.isLeft shouldBe true
   }
 
   test("parseFeatures") {

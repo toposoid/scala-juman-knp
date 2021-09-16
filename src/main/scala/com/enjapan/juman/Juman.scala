@@ -1,5 +1,6 @@
-package com.enjapan
-package juman
+package com.enjapan.juman
+
+import com.enjapan.SocketServer
 
 import scala.sys.process._
 
@@ -17,7 +18,7 @@ object Juman {
   def startServer(command:Seq[String] = JUMAN_PATH +: JUMAN_SERVER_FLAGS) :Process = SocketServer.startServer(command)
   def withServer[T](command: Seq[String] = JUMAN_PATH +: JUMAN_SERVER_FLAGS)(f: () => T):T = SocketServer.withServer(command)(f)
 
-  import SocketClient._
+  import com.enjapan.SocketClient._
 
   def withClient[T](host:String = DEFAULT_JUMAN_HOST, port:Int = DEFAULT_JUMAN_PORT) (f: JumanClient => T)  = {
     withSocket(host,port) { s =>

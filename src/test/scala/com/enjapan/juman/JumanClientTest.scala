@@ -6,6 +6,7 @@ import org.scalatest.{FunSuite, Matchers}
 /**
   * Created by Ugo Bataillard on 3/10/16.
   */
+
 class JumanClientTest extends FunSuite with Matchers {
 
   test("testParse") {
@@ -32,7 +33,7 @@ class JumanClientTest extends FunSuite with Matchers {
     jumanClient.init()
     val res = jumanClient.run(Iterator(stringToParse))
 
-    res.toList should contain theSameElementsInOrderAs jumanInputData.lines.drop(2).toTraversable
+    res.toList should contain theSameElementsInOrderAs jumanInputData.lines.toArray.drop(2).toTraversable
 
     jumanOut.toString("UTF-8") should be
     s"""

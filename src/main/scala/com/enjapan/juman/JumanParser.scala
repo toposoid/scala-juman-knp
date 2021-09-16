@@ -1,6 +1,5 @@
 package com.enjapan.juman
 
-import cats.data.Xor
 import com.enjapan.juman.models.Morpheme
 import com.enjapan.knp.ParseException
 
@@ -15,7 +14,7 @@ object JumanParser {
 
   val splitOutsideQuotesReges = """[^\s"]+|"([^"]*)"""".r
 
-  def parseMorpheme(spec:String): Xor[ParseException, Morpheme] = {
+  def parseMorpheme(spec:String): Either[ParseException, Morpheme] = {
     splitOutsideQuotesReges.findAllMatchIn(spec).map { m =>
       m.group(0) match {
         case null => m.source.toString
@@ -23,7 +22,7 @@ object JumanParser {
       }
     }.toList match {
       case midasi::yomi::genkei::hinsi::hinsiId::bunrui::bunruiId::katuyou1::katuyou1Id::katuyou2::katuyou2Id::imis::fstring::_ =>
-        Xor.right(Morpheme(
+        Right(Morpheme(
           midasi,
           yomi,
           genkei,
@@ -38,7 +37,7 @@ object JumanParser {
           imis,
           fstring
         ))
-      case _ => Xor.left(ParseException(s"Could not parse morpheme line: $spec"))
+      case _ => Left(ParseException(s"Could not parse morpheme line: $spec"))
     }
 
   }

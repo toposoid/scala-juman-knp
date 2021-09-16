@@ -1,5 +1,6 @@
-package com.enjapan
-package juman
+package com.enjapan.juman
+
+import com.enjapan.SocketClient
 
 import java.io.{InputStream, OutputStream}
 

@@ -1,19 +1,18 @@
-package com.enjapan
-package knp
+package com.enjapan.knp
 
-import juman.JumanClient
+import com.enjapan.SocketClient
+import com.enjapan.juman.JumanClient
+
 import java.io.{InputStream, OutputStream}
-
-import cats.data.Xor
 import com.enjapan.knp.models.BList
 
 class KNPClient(jumanClient: JumanClient, in: InputStream, out:OutputStream) extends SocketClient(in, out) with KNP {
   val command = "RUN -tab"
 
-  override def parse(text: String): Xor[ParseException, BList] = {
+  override def parse(text: String): Either[ParseException, BList] = {
     val cleaned = text.replace("\n","").trim
     if (cleaned.isEmpty) {
-     Xor.left(ParseException("Can not parse empty strings"))
+     Left(ParseException("Can not parse empty strings"))
     } else {
       val jumanRes = jumanClient.run(Iterator(cleaned))
       val knpRes = run(jumanRes)

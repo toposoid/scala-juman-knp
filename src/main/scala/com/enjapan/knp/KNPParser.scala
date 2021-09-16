@@ -4,16 +4,20 @@ package com.enjapan.knp
   * Created by Ugo Bataillard on 2/2/16.
   */
 
-import cats.data.Xor
-import cats.std.list._
+
+import cats.implicits.catsStdInstancesForEither
 import cats.syntax.traverse._
-import cats.syntax.xor._
+
+import cats.data.EitherT
+import cats.implicits.catsStdInstancesForList
 import com.enjapan.juman.JumanParser
+import com.enjapan.juman.models.Morpheme
 import com.enjapan.knp.models._
 
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.util.matching.Regex
+import scala.Either
 
 /**
   * Created by Ugo Bataillard on 2/1/16.
@@ -33,7 +37,7 @@ case class ParseException(msg: String) extends Exception(msg)
 
 class KNPParser(val breakingPattern: Regex = "^EOS$".r) {
 
-  def parse(lines: Iterable[String]): Xor[ParseException, BList] = {
+  def parse(lines: Iterable[String]): Either[ParseException, BList] = {
 
     val relevantLines = lines.map(_.trim)
       .filter(_.nonEmpty)
@@ -41,8 +45,14 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r) {
       .filterNot(_.startsWith("EOS"))
 
     for {
+      /*
       _ <- relevantLines.find(_.startsWith(";;")).fold(Xor.right[ParseException, Null](null)) { errorLine =>
         Xor.left(ParseException(s"Error found line starting with ';;: $errorLine"))
+      }
+      */
+
+      _ <- relevantLines.find(_.startsWith(";;")).fold(Right[ParseException, Null](null).asInstanceOf[Either[ParseException, BList]]){ errorLine =>
+        Left(ParseException(s"Error found line starting with ';;: $errorLine"))
       }
 
       // Check if there can be only one comment
@@ -57,7 +67,7 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r) {
     } yield BList(breakingPattern.toString, comment, sid, bunsetsus.toIndexedSeq)
   }
 
-  def parseBunsetsu(lines: Iterable[String]): ParseException Xor Bunsetsu = {
+  def parseBunsetsu(lines: Iterable[String]): ParseException Either Bunsetsu = {
     for {
       r <- parseLine(lines.head, KNPParser.BUNSETSU_REGEX)
       (parentId, dpndtype, fstring, features, paTypes, s, ss) = r
@@ -65,28 +75,28 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r) {
     } yield Bunsetsu(parentId, dpndtype, fstring, paTypes, features, tags)
   }
 
-  def parseTag(lines: Iterable[String]): Xor[ParseException, Tag] = {
+  def parseTag(lines: Iterable[String]): Either[ParseException, Tag] = {
     for {
       r <- parseLine(lines.head, KNPParser.TAG_REGEX)
       (parentId, dpndtype, fstring, features, paTypes, rels, pas) = r
-      morphemes <- (lines.drop(1) map JumanParser.parseMorpheme).toList.sequenceU
+      morphemes <-(lines.drop(1) map JumanParser.parseMorpheme).toList.sequenceU
     } yield Tag(parentId, dpndtype, fstring, paTypes, morphemes, features, rels, pas)
   }
 
   def parseKNPNodeLines[T](
     prefix: String,
-    lines: Iterable[String], parseNode: Iterable[String] => Xor[ParseException, T]): Xor[ParseException, List[T]] = {
+    lines: Iterable[String], parseNode: Iterable[String] => Either[ParseException, T]): Either[ParseException, List[T]] = {
     @tailrec
-    def recParse(lines: Iterable[String], result: Xor[ParseException, List[T]]): Xor[ParseException, List[T]] = (lines, result) match {
-      case (_, r: Xor.Left[ParseException]) => r
+    def recParse(lines: Iterable[String], result: Either[ParseException, List[T]]): Either[ParseException, List[T]] = (lines, result) match {
+      case (_, Left(r)) => Left(r)
       case (ls, r) if ls.isEmpty => r
-      case (ls, Xor.Right(r)) if ls.head.startsWith(prefix) =>
+      case (ls, Right(r)) if ls.head.startsWith(prefix) =>
         val (nodeLines, remainingLines) = lines.tail.span(!_.startsWith(prefix))
         val node = parseNode(Iterable(ls.head) ++ nodeLines)
         recParse(remainingLines, node.map(_ :: r))
-      case (ls, _) => Xor.Left(ParseException(s"Invalid line while parsing KNP node: $ls"))
+      case (ls, _) => Left(ParseException(s"Invalid line while parsing KNP node: $ls"))
     }
-    recParse(lines, Xor.right(List.empty)).map(_.reverse)
+    recParse(lines, Right(List.empty)).map(_.reverse)
   }
 
   def parseFeatures(fstring: String): (Map[String, String], List[Rel]) = {
@@ -160,9 +170,9 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r) {
       }
   }
 
-  def parseLine(line: String, linePattern: Regex): Xor[ParseException, (Int, String, String, Map[String, String], List[PAType], List[Rel], Option[Pas])] = {
+  def parseLine(line: String, linePattern: Regex): Either[ParseException, (Int, String, String, Map[String, String], List[PAType], List[Rel], Option[Pas])] = {
     val l = line.trim
-    val headers = Xor.fromOption({
+    val headers = EitherT.fromOption({
       if (l.length == 1) {
         None
       }
@@ -176,12 +186,12 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r) {
       }
     }, ParseException(s"Illegal KNP node spec: " + l))
 
-    headers.map { case (parentId, dpndtype, fstring)  =>
+    headers.map { case (parentId, dpndtype, fstring) =>
       val (features, rels) = parseFeatures(fstring)
       val paTypes = List.empty ++ features.get("用言").map(Predicate.apply) ++ features.get("体言").map(_ => Argument)
       val pas = features.get("格解析結果").flatMap(parsePAS)
       (parentId, dpndtype, fstring, features, paTypes, rels, pas)
-    }
+    }.value.head
   }
 }
 

@@ -8,6 +8,7 @@ import org.scalatest.{FunSuite, Matchers}
 /**
   * Created by Ugo Bataillard on 3/10/16.
   */
+
 class KNPClientTest extends FunSuite with Matchers {
 
   test("testParse") {
@@ -69,10 +70,13 @@ class KNPClientTest extends FunSuite with Matchers {
         |学校を探しています。
       """.stripMargin
 
+
     knpOut.toString("UTF-8") should be
     s"""
        |${knpClient.command}
-       |${jumanInputData.lines.drop(1).mkString("\n")}
+       |${jumanInputData.lines.toArray.drop(1).mkString("\n")}
       """.stripMargin
+
+
   }
 }

@@ -2,8 +2,8 @@ name := "scala-juman-knp"
 description := "Scala wrapper around JUMAN and KNP."
 organization := "com.enjapan"
 
-scalaVersion := "2.11.7"
-crossScalaVersions := Seq("2.10.6", "2.11.7")
+scalaVersion := "2.12.12"
+crossScalaVersions := Seq("2.10.6", "2.11.7", "2.12.12")
 
 scalacOptions ++= Seq(
     "-deprecation",
@@ -22,11 +22,11 @@ scalacOptions ++= Seq(
   )
 
 scalacOptions ++= {
-  if (scalaBinaryVersion.value == "2.11") Seq("-Ywarn-infer-any", "-Ywarn-unused-import") else Nil
+  if (scalaBinaryVersion.value == "2.12") Seq("-Ywarn-infer-any", "-Ywarn-unused-import") else Nil
 }
 
-libraryDependencies += "org.typelevel" %% "cats" % "0.4.0"
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
+libraryDependencies += "org.typelevel" %% "cats-core" % "0.9.0"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test"
 
 coverageExcludedPackages := "com.enjapan.knp.KNP"
 
