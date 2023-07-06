@@ -2,8 +2,7 @@ name := "scala-juman-knp"
 description := "Scala wrapper around JUMAN and KNP."
 organization := "com.enjapan"
 
-scalaVersion := "2.12.12"
-crossScalaVersions := Seq("2.10.6", "2.11.7", "2.12.12")
+scalaVersion := "2.13.11"
 
 scalacOptions ++= Seq(
     "-deprecation",
@@ -17,7 +16,7 @@ scalacOptions ++= Seq(
     "-Ywarn-nullary-unit",
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard",
-    "-target:jvm-1.7",
+    "-target:jvm-1.8",
     "-encoding", "UTF-8"
   )
 
