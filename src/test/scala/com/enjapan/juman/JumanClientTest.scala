@@ -1,13 +1,14 @@
 package com.enjapan.juman
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 /**
   * Created by Ugo Bataillard on 3/10/16.
   */
 
-class JumanClientTest extends FunSuite with Matchers {
+class JumanClientTest extends AnyFunSuite with Matchers {
 
   test("testParse") {
 

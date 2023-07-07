@@ -79,7 +79,7 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r) {
     for {
       r <- parseLine(lines.head, KNPParser.TAG_REGEX)
       (parentId, dpndtype, fstring, features, paTypes, rels, pas) = r
-      morphemes <-(lines.drop(1) map JumanParser.parseMorpheme).toList.sequenceU
+      morphemes <-(lines.drop(1) map JumanParser.parseMorpheme).toList.sequence
     } yield Tag(parentId, dpndtype, fstring, paTypes, morphemes, features, rels, pas)
   }
 
@@ -172,7 +172,7 @@ class KNPParser(val breakingPattern: Regex = "^EOS$".r) {
 
   def parseLine(line: String, linePattern: Regex): Either[ParseException, (Int, String, String, Map[String, String], List[PAType], List[Rel], Option[Pas])] = {
     val l = line.trim
-    val headers = EitherT.fromOption({
+    val headers = EitherT.fromOption[List]({
       if (l.length == 1) {
         None
       }

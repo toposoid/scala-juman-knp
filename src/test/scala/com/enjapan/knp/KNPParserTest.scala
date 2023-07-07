@@ -1,13 +1,15 @@
 package com.enjapan.knp
 
 import com.enjapan.knp.models.{Predicate, Argument}
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
+
 import scala.Either
 /**
   * Created by Ugo Bataillard on 2/2/16.
   */
 
-class KNPParserTest extends FunSuite with Matchers {
+class KNPParserTest extends AnyFunSuite with Matchers {
 
   test("testParse") {
     val knpOutput =

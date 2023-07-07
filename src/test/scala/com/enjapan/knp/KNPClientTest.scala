@@ -3,13 +3,15 @@ package com.enjapan.knp
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.enjapan.juman.JumanClient
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
+
 
 /**
   * Created by Ugo Bataillard on 3/10/16.
   */
 
-class KNPClientTest extends FunSuite with Matchers {
+class KNPClientTest extends AnyFunSuite with Matchers {
 
   test("testParse") {
 

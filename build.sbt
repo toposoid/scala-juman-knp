@@ -9,14 +9,6 @@ scalacOptions ++= Seq(
     "-feature",
     "-unchecked",
     "-Xlint",
-    "-Ywarn-adapted-args",
-    "-Ywarn-dead-code",
-    "-Ywarn-inaccessible",
-    "-Ywarn-nullary-override",
-    "-Ywarn-nullary-unit",
-    "-Ywarn-numeric-widen",
-    "-Ywarn-value-discard",
-    "-target:jvm-1.8",
     "-encoding", "UTF-8"
   )
 
@@ -24,8 +16,8 @@ scalacOptions ++= {
   if (scalaBinaryVersion.value == "2.12") Seq("-Ywarn-infer-any", "-Ywarn-unused-import") else Nil
 }
 
-libraryDependencies += "org.typelevel" %% "cats-core" % "0.9.0"
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+libraryDependencies += "org.typelevel" %% "cats-core" % "2.9.0"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.16" % "test"
 
 coverageExcludedPackages := "com.enjapan.knp.KNP"
 
