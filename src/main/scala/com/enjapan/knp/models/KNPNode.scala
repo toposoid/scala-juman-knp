@@ -24,7 +24,7 @@ abstract class KNPNode[T <: KNPNode[T]] { self:T =>
     _parent = p
   }
 
-  protected[knp] def addChild(child: T) {
+  protected[knp] def addChild(child: T) :Unit = {
     _children ::= child
   }
 

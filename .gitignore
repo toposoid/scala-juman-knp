@@ -22,3 +22,6 @@ native/
 /.idea_modules/
 #Project
 data/
+.DS_Store
+.bsp/
+

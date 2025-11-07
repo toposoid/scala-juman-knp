@@ -57,7 +57,8 @@ class KNPParserTest extends AnyFunSuite with Matchers {
     bunsetsuList(2).parentId shouldBe -1
     bunsetsuList(2).parent shouldBe None
     bunsetsuList(1).children should contain theSameElementsAs Seq(bunsetsuList(0))
-    bunsetsuList(0).children should be('empty)
+    //bunsetsuList(0).children should be('empty)
+    bunsetsuList(0).children.size shouldBe 0
 
     tagList(1).parent.get shouldBe tagList(2)
     tagList(2).children should contain theSameElementsAs Seq(tagList(1))
@@ -168,7 +169,8 @@ class KNPParserTest extends AnyFunSuite with Matchers {
     val (f, _) = parser.parseFeatures(tagStr)
     f("BGH") shouldBe "構文/こうぶん"
     f("係") shouldBe "文節内"
-    f.get("先行詞候補") should be('defined)
+    //f.get("先行詞候補") should be('defined)
+    f.get("先行詞候補") shouldBe(Symbol("defined"))
     f.get("dummy") shouldBe None
     f("正規化代表表記") shouldBe "構文/こうぶん"
   }
@@ -195,7 +197,8 @@ class KNPParserTest extends AnyFunSuite with Matchers {
     val parser = new KNPParser()
     val (Some(pas)) = parser.parsePAS(pasStr)
     pas.cfid shouldBe "?/?:判0"
-    pas.arguments should be ('empty)
+    //pas.arguments should be ('empty)
+    pas.arguments.size shouldBe 0
   }
 
   test("testParseRels") {

@@ -60,8 +60,9 @@ class KNPClientTest extends AnyFunSuite with Matchers {
     jumanClient.init()
     knpClient.init()
     val res = knpClient.parse(stringToParse)
+    //res should be ('right)
+    res shouldBe(Symbol("right"))
 
-    res should be ('right)
     val bTree = res.getOrElse(throw new Exception("Should not happen"))
     bTree.comment shouldBe knpInputData.split("\n").drop(2).head
     bTree.bunsetsuList should have size(2)
