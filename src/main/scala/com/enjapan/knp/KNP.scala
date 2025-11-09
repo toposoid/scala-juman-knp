@@ -16,7 +16,7 @@ object KNP {
 
   val KNP_PATH = helpers.envProps.getOrElse("KNP_PATH", "knp")
 
-  val KNP_FLAGS = List("-tab")
+  val KNP_FLAGS = List("-tab", "-ne-crf")
   val KNP_SERVER_FLAGS = "-F" :: KNP_FLAGS
   val DEFAULT_KNP_HOST = "127.0.0.1"
   val DEFAULT_KNP_PORT = 31000
